@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <title>ISE Panorama Display</title>
+  <style>
+    /* feel free to style the canvas any way you want. If you want it to
+      use the entire window, set width: 100% and height: 100%. */
+
+    canvas {
+      display: block;
+      margin: 10px auto;
+      width: 80%;
+      height: 500px;
+    }
+  </style>
+
+  <script src="./js/three.js"></script>
+  <script src="./js/tw.js"></script>
+  <script src="./js/OrbitControls.js"></script>
+  <script src="./js/SceneUtils.js"></script>
+  <!-- <script src="./js/dat.gui.js"></script> -->
+
+</head>
+
+<body>
+  <h1><em>Relaxing Floral Scene</em></h1>
+  <p>
+    <script>
+
+        // create a scene
+        var scene = new THREE.Scene();
+
+        var cameraParams = {
+            near: 1,
+            far: 100,
+            fov: 100,                 // degrees
+            aspectRatio: 1000 / 600,   // from dimensions of the canvas, see CSS
+            atX: 0,
+            atY: 0,
+            atZ: 0,
+            eyeX: 0,
+            eyeY: 0,
+            eyeZ: 15,
+            upX: 0,
+            upY: 1,
+            upZ: 0
+        };
+
+        // setupCamera() function creates and returns a camera with the desired parameters
+
+        function setupCamera() {
+            // set up an abbreviation 
+            var cp = cameraParams;
+            // create an initial camera with the desired shape
+            var c = new THREE.PerspectiveCamera(cp.fov, cp.aspectRatio, cp.near, cp.far);
+            // set the camera location and orientation
+            c.position.set(cp.eyeX, cp.eyeY, cp.eyeZ);
+            c.up.set(cp.upX, cp.upY, cp.upZ);
+            c.lookAt(new THREE.Vector3(cp.atX, cp.atY, cp.atZ));
+            return c;
+        }
+
+        var camera = setupCamera();
+
+        scene.add(camera);
+
+        function setupCameraControls() {
+            var cameraControls = new THREE.OrbitControls(camera, canvas);
+            cameraControls.addEventListener('change', render);
+            cameraControls.update();
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+
+        // displayPanels() displays three panels with texture-mapped image of floral scene
+
+        function displayPanels(textures) {
+            // plane geometry with texture-mapped floral image
+            var planeGeom = new THREE.PlaneGeometry(10, 10);
+            var planeMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                map: textures[1],
+                side: 2
+            });
+            var planeMesh = new THREE.Mesh(planeGeom, planeMat);
+            scene.add(planeMesh);
+
+            // repeat texture mapping on right panel
+            var planeMeshRGeo = new THREE.PlaneGeometry(10, 10);
+            var planeMeshRMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                map: textures[2],
+                side: 2
+            });
+            var planeMeshR = new THREE.Mesh(planeMeshRGeo, planeMeshRMat);
+            var dist = 5 * Math.cos(Math.PI / 4);
+            planeMeshR.position.set(5 + dist, 0, dist);
+            planeMeshR.rotation.y = -Math.PI / 4;
+            scene.add(planeMeshR);
+
+            // repeat texture mapping on left panel
+            var planeMeshLGeo = new THREE.PlaneGeometry(10, 10);
+            var planeMeshLMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                map: textures[0],
+                side: 2
+            });
+            var planeMeshL = new THREE.Mesh(planeMeshLGeo, planeMeshLMat);
+            planeMeshL.position.set(-5 - dist, 0, dist);
+            planeMeshL.rotation.y = Math.PI / 4;
+            scene.add(planeMeshL);
+
+            renderer.render(scene, camera);    // render the scene
+        }
+
+        var renderer = new THREE.WebGLRenderer();
+
+        var canvas = renderer.domElement;
+        //note state has been created as a global so we can modify it later if we desire
+        renderer = renderer;  // save this so that others can use it.
+        scene = scene;        // save this so that others can use it.
+        var parent = document.body;
+        parent.appendChild(canvas);
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setClearColor(new THREE.Color(0xFFFFFF), 1); //darker greyish... it's evening!
+
+        setupCameraControls();
+        renderer.render(scene, camera);
+
+        // create a TextureLoader for loading the image file
+        var loader = new THREE.TextureLoader();
+
+        // load the relaxation.jpg image (stored in the same folder as this webpage),
+        // and when the image load is complete, invoke the anonymous function callback
+
+        let files = ["images/GU-ISE0.jpg", "images/GU-ISE1.jpg", "images/GU-ISE2.jpg"]
+
+        TW.loadTextures(files,
+            function (textures) {
+            displayPanels(textures);
+        });
+
+    </script>
+  </p>
+  <!-- <canvas width="1433" height="500" style="width: 1433px; height: 500px;"></canvas> -->
+
+</body>
+
+</html>
